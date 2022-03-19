@@ -27,6 +27,8 @@ class StreamReassembler {
     size_t _end_pos_index = 0;             //!< The index of the last byte of the last segment
     bool _is_eof = false;                  //!< Flag indicating that the stream has reached its end
 
+    long merge_segment(_segment &_seg_1, const _segment &_seg_2);
+
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
     //! \note This capacity limits both the bytes that have been reassembled,
