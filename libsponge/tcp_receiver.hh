@@ -5,6 +5,7 @@
 #include "stream_reassembler.hh"
 #include "tcp_segment.hh"
 #include "wrapping_integers.hh"
+#include "tcp_header.hh"
 
 #include <optional>
 
@@ -17,8 +18,13 @@ class TCPReceiver {
     //! Our data structure for re-assembling bytes.
     StreamReassembler _reassembler;
 
-    //! The maximum number of bytes we'll store.
-    size_t _capacity;
+	bool _SYN_received = false;
+    bool _FIN_received = false;
+    
+    size_t _capacity; //! The maximum number of bytes we'll store.
+    WrappingInt32 _isn = WrappingInt32(UINT32_MAX); //! keep track of the Initial sequence number, used to unwrap to absolute sequence number
+	size_t _ackno = 0;
+	
 
   public:
     //! \brief Construct a TCP receiver
