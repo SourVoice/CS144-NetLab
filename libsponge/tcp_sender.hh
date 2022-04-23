@@ -32,6 +32,28 @@ class TCPSender {
     //! the (absolute) sequence number for the next byte to be sent
     uint64_t _next_seqno{0};
 
+    std::queue<TCPSegment> _segments_outstanding{};
+    size_t _bytes_been_send{0};
+
+    size_t _base_seqno{0};     // the last sequence number hasn't been acknowledged
+    size_t _ackno_receive{0};  // last acknowledged number the sender received
+
+    bool _syn_send = false;  // a flag to represidents the segment with the syn(true) has been sent
+    bool _fin_send = false;  // a flag to represidents the segment with the fin(true) has been sent
+
+    size_t _window_size = 0;  // the window_size of the receiver
+
+    // retransmission part
+    bool _time_start = false;
+    size_t _time_split{0};
+    size_t _retransmission_timeout{0};        // (RTO)
+    size_t _consecutive_restransmissions{0};  // to count the num of the segment has been retransmission
+
+    bool ackLegal(uint64_t ackno);
+    void AddSegmentToQueue(TCPSegment &newSeg);
+
+    void StartTimer();  // function to start the timer (when each segment push into segments_out)
+
   public:
     //! Initialize a TCPSender
     TCPSender(const size_t capacity = TCPConfig::DEFAULT_CAPACITY,

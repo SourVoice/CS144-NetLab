@@ -11,7 +11,7 @@
 // You will need to add private members to the class declaration in `byte_stream.hh`
 
 template <typename... Targs>
-void DUMMY_CODE(Targs &&.../* unused */) {}
+void DUMMY_CODE(Targs &&... /* unused */) {}
 
 using namespace std;
 
@@ -38,7 +38,8 @@ string ByteStream::peek_output(const size_t len) const {
     }
     string s;
     s = _buffer.concatenate();
-    return s.assign(s.begin(), s.begin() + len);
+    return string().assign(s.begin(),
+                           s.begin() + length);  //  rewrite here, because assign will replacing its current contents
 }
 
 //! \param[in] len bytes will be removed from the output side of the buffer
