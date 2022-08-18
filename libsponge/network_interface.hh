@@ -5,8 +5,12 @@
 #include "tcp_over_ip.hh"
 #include "tun.hh"
 
+#include <map>
 #include <optional>
 #include <queue>
+#include <unordered_map>
+#include <vector>
+#include <list>
 
 //! \brief A "network interface" that connects IP (the internet layer, or network layer)
 //! with Ethernet (the network access layer, or link layer).
@@ -40,6 +44,22 @@ class NetworkInterface {
     //! outbound queue of Ethernet frames that the NetworkInterface wants sent
     std::queue<EthernetFrame> _frames_out{};
 
+    struct MyCompare {
+        bool operator()(const Address &a, const Address &b) const { return a.ipv4_numeric() < b.ipv4_numeric(); }
+    };
+    //! arp table
+    //! | ip | ethernet address | TTL(seconds) |
+    std::map<Address, std::pair<EthernetAddress, uint32_t>, MyCompare> _arp_table = {{}};
+
+    //! arp request cache, arp has been sent as request but without reply
+    std::map<Address, uint32_t, MyCompare> _arp_request_cache = {{}};
+
+    //! arp table does not have next hop address, store it in cache
+    std::list<std::pair<InternetDatagram, Address>> _dgram_cache = {};
+
+    //! 经过的时间
+    size_t _time = 0;
+
   public:
     //! \brief Construct a network interface with given Ethernet (network-access-layer) and IP (internet-layer) addresses
     NetworkInterface(const EthernetAddress &ethernet_address, const Address &ip_address);
@@ -62,6 +82,9 @@ class NetworkInterface {
 
     //! \brief Called periodically when time elapses
     void tick(const size_t ms_since_last_tick);
+
+    /*add function*/
+    EthernetFrame make_broadcast_frame(const Address &src_ip);
 };
 
 #endif  // SPONGE_LIBSPONGE_NETWORK_INTERFACE_HH
